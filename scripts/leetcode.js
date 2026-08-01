@@ -1296,7 +1296,16 @@ function classifyPattern(topicTags, titleSlug = '') {
  * @param {string} [titleSlug]
  * @returns {string}
  */
-function getPatternFolder(topicTags, titleSlug) {
+function getPatternFolder(topicTags, titleSlug, solutionCode = '') {
+  // LeetCode attaches every applicable tag to a question, but the submitted
+  // implementation tells us which of those tags the solution actually uses.
+  // Keep this deliberately conservative: tags remain the fallback unless the
+  // code contains a real bitwise operation.
+  const usesBitwiseOperator = /\^=?|(?:[\w.)\]])\s*[&|]=?\s*(?:[\w.(\[]|\d)|(?:[\w.)\]])\s*(?:<<|>>)\s*(?:[\w.(\[]|\d)|~\s*(?:[\w.(\[]|\d)/.test(solutionCode);
+  if (slugSet(topicTags).has('bit-manipulation') && usesBitwiseOperator) {
+    return toFolderName('Bit Manipulation');
+  }
+
   return toFolderName(classifyPattern(topicTags, titleSlug));
 }
 
@@ -1958,11 +1967,12 @@ function loader(leetCode) {
       }
 
       const problemName = leetCode.getProblemNameSlug();
+      const code = leetCode.findCode(probStats);
       const topicTags = leetCode.submissionData?.question?.topicTags;
       const titleSlug = leetCode.submissionData?.question?.titleSlug;
 
-      /* Categorize this problem into a pattern folder, e.g. "Sliding Window - Dynamic Size" */
-      const pattern = getPatternFolder(topicTags, titleSlug);
+      /* Prefer an unambiguous submitted implementation over generic question tags. */
+      const pattern = getPatternFolder(topicTags, titleSlug, code);
       const problemPath = `${pattern}/${problemName}`;
 
       const alreadyCompleted = await isCompleted(problemPath);
@@ -1994,7 +2004,6 @@ function loader(leetCode) {
       }
 
       /* Upload code to Git */
-      const code = leetCode.findCode(probStats);
       const commitMsg = getSolutionCommitMessage(leetCode, problemName);
       const uploadCode = uploadGitWith409Retry(encode(code), problemPath, filename, commitMsg);
 

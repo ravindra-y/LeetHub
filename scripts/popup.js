@@ -421,6 +421,7 @@ const organizerQuestion = async titleSlug => {
  */
 const organizerSolutionPattern = code => {
   const text = code.toLowerCase();
+  if (/\^=?|(?:[\w.)\]])\s*[&|]=?\s*(?:[\w.(\[]|\d)|(?:[\w.)\]])\s*(?:<<|>>)\s*(?:[\w.(\[]|\d)|~\s*(?:[\w.(\[]|\d)/.test(text)) return { pattern: 'Bit Manipulation', evidence: 'bitwise operation' };
   if (/\b(parent|rank|size)\b/.test(text) && /\b(find|union)\s*\(/.test(text)) return { pattern: 'Union Find', evidence: 'find/union parent structure' };
   if (/\b(segmenttree|buildtree|querytree|updatetree)\b/.test(text)) return { pattern: 'Binary Indexed Tree / Segment Tree', evidence: 'segment-tree operations' };
   if (/\b(deque|arraydeque)\b/.test(text) && /\b(monotonic|pop_front|pop_back)\b/.test(text)) return { pattern: 'Monotonic Queue', evidence: 'monotonic deque' };
