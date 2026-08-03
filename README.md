@@ -19,6 +19,8 @@
 
 ⭐ **Star this repo if LeetHub v3 saves you time!** ⭐
 
+**Based on:** [LeetHub](https://github.com/QasimWani/LeetHub) by **QasimWani**. This version contains updates and improvements for compatibility and reliability.
+
 </div>
 
 ---
@@ -147,6 +149,12 @@ Your trust matters more than any feature. Here's LeetHub v3's privacy promise:
 
 ---
 
+## 🙏 Credits & Attribution
+
+**Based on:** [LeetHub](https://github.com/QasimWani/LeetHub) by **QasimWani**. This version (LeetHub v3) contains updates and improvements for compatibility and reliability, built on top of the original project's foundation. 💜
+
+---
+
 ## 🤝 Contributing Guidelines
 
 Contributions make the open-source world go round — and **LeetHub v3 welcomes all of them**! 🌍
@@ -181,6 +189,8 @@ Contributions make the open-source world go round — and **LeetHub v3 welcomes 
 <div align="center">
 
 Built with 💜 by **[Ravindra](https://github.com/ravindra-y)**
+
+Based on the original **[LeetHub](https://github.com/QasimWani/LeetHub)** project by **QasimWani**.
 
 📜 Licensed under the **MIT License** — free to use, modify, and distribute.
 
