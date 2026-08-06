@@ -1176,6 +1176,8 @@ function classifyPattern(topicTags, titleSlug = '') {
 
   // #128 may be tagged union-find, but its canonical solution is a hash set.
   if (title === 'longest-consecutive-sequence') return 'Hash Tables';
+  // #706 is also tagged linked-list because chaining is an implementation detail.
+  if (title === 'design-hashmap') return 'Hash Tables';
 
   // ---- Trees: traversal order & BST/Trie first (most specific) ----
   if (has('binary-tree', 'tree')) {
