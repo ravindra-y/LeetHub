@@ -12,8 +12,10 @@ const tags = [{ slug: 'array' }, { slug: 'binary-search' }, { slug: 'bit-manipul
 assert.equal(context.getPatternFolder(tags, 'missing-number', 'answer ^= number;'), 'Bit Manipulation');
 assert.equal(context.getPatternFolder(tags, 'missing-number', 'while (left <= right) { const mid = (left + right) / 2; }'), 'Binary Search');
 assert.equal(context.getPatternFolder([{ slug: 'design' }, { slug: 'hash-table' }, { slug: 'linked-list' }], 'design-hashmap'), 'Hash Tables');
+assert.equal(context.getPatternFolder([{ slug: 'string' }, { slug: 'queue' }, { slug: 'hash-table' }], 'first-unique-character-in-a-string'), 'Hash Tables');
 
 const popup = fs.readFileSync('scripts/popup.js', 'utf8');
 const organizer = popup.slice(popup.indexOf('const organizerClassify'), popup.indexOf('const organizerApi'));
 vm.runInContext(`${organizer}\nthis.organizerClassify = organizerClassify;`, context);
 assert.equal(context.organizerClassify([{ slug: 'design' }, { slug: 'hash-table' }, { slug: 'linked-list' }], 'design-hashmap'), 'Hash Tables');
+assert.equal(context.organizerClassify([{ slug: 'string' }, { slug: 'queue' }, { slug: 'hash-table' }], 'first-unique-character-in-a-string'), 'Hash Tables');
