@@ -1282,9 +1282,9 @@ function classifyPattern(topicTags, titleSlug = '') {
   if (has('segment-tree', 'binary-indexed-tree')) return 'Binary Indexed Tree / Segment Tree';
   if (has('line-sweep')) return 'Line Sweep';
   if (has('string-matching', 'rolling-hash')) return 'String Matching';
-  if (has('geometry', 'math')) return 'Maths / Geometry';
   if (has('bit-manipulation')) return 'Bit Manipulation';
   if (has('hash-table')) return 'Hash Tables';
+  if (has('geometry', 'math')) return 'Maths / Geometry';
   if (has('matrix')) return 'Matrix (2D Array)';
 
   // ---- Broadest fallbacks ----

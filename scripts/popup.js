@@ -388,9 +388,9 @@ const organizerClassify = (topicTags, titleSlug) => {
   if (has('greedy')) return 'Greedy';
   if (has('segment-tree', 'binary-indexed-tree')) return 'Binary Indexed Tree / Segment Tree';
   if (has('string-matching', 'rolling-hash')) return 'String Matching';
-  if (has('geometry', 'math')) return 'Maths / Geometry';
   if (has('bit-manipulation')) return 'Bit Manipulation';
   if (has('hash-table')) return 'Hash Tables';
+  if (has('geometry', 'math')) return 'Maths / Geometry';
   if (has('matrix')) return 'Matrix (2D Array)';
   if (has('string')) return 'Strings';
   if (has('array')) return 'Arrays';
