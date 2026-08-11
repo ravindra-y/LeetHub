@@ -1328,6 +1328,9 @@ const discussionMsg = 'Prepend discussion post - LeetHub';
 const createNotesMsg = 'Attach NOTES - LeetHub';
 const leetCodeUsername = 'ravindra-y';
 
+// Static Shields badges use `-` as a separator; `--` displays one literal dash.
+const badgeText = text => String(text).replace(/-/g, '--');
+
 /**
  * Fetches real, live stats for the profile README instead of relying on
  * numbers baked into a template: total/easy/medium/hard solved counts,
@@ -1416,6 +1419,8 @@ async function getLeetCodeProfileStats() {
  */
 const buildRepoReadme = (stats, githubUsername = leetCodeUsername) => {
   const { solved, acceptanceRate, currentStreak, maxStreak } = stats;
+  const leetCodeBadgeUsername = badgeText(leetCodeUsername);
+  const githubBadgeUsername = badgeText(githubUsername);
 
   const milestones = [100, 250, 500];
   const nextMilestone = milestones.find(m => solved < m) ?? milestones[milestones.length - 1];
@@ -1430,8 +1435,8 @@ const buildRepoReadme = (stats, githubUsername = leetCodeUsername) => {
 
 #  LeetCode Solved Solutions
 
-[![LeetCode Profile](https://img.shields.io/badge/LeetCode-${leetCodeUsername}-FFA116?style=for-the-badge&logo=leetcode&logoColor=black)](https://leetcode.com/u/${leetCodeUsername}/)
-[![GitHub Profile](https://img.shields.io/badge/GitHub-${githubUsername}-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/${githubUsername})
+[![LeetCode Profile](https://img.shields.io/badge/LeetCode-${leetCodeBadgeUsername}-FFA116?style=for-the-badge&logo=leetcode&logoColor=black)](https://leetcode.com/u/${leetCodeUsername}/)
+[![GitHub Profile](https://img.shields.io/badge/GitHub-${githubBadgeUsername}-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/${githubUsername})
 [![Language](https://img.shields.io/badge/Language-C++-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)](https://isocpp.org/)
 
 ---
