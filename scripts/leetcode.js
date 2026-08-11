@@ -1180,6 +1180,8 @@ function classifyPattern(topicTags, titleSlug = '') {
   if (title === 'design-hashmap') return 'Hash Tables';
   // #387 is also tagged queue, but its standard solution counts characters.
   if (title === 'first-unique-character-in-a-string') return 'Hash Tables';
+  // #219 maintains a set for exactly k prior indices.
+  if (title === 'contains-duplicate-ii') return 'Sliding Window - Fixed Size';
 
   // ---- Trees: traversal order & BST/Trie first (most specific) ----
   if (has('binary-tree', 'tree')) {

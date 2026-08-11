@@ -14,6 +14,7 @@ assert.equal(context.getPatternFolder(tags, 'missing-number', 'while (left <= ri
 assert.equal(context.getPatternFolder([{ slug: 'design' }, { slug: 'hash-table' }, { slug: 'linked-list' }], 'design-hashmap'), 'Hash Tables');
 assert.equal(context.getPatternFolder([{ slug: 'string' }, { slug: 'queue' }, { slug: 'hash-table' }], 'first-unique-character-in-a-string'), 'Hash Tables');
 assert.equal(context.getPatternFolder([{ slug: 'array' }, { slug: 'hash-table' }, { slug: 'math' }], 'number-of-good-pairs'), 'Hash Tables');
+assert.equal(context.getPatternFolder([{ slug: 'array' }, { slug: 'hash-table' }, { slug: 'sliding-window' }], 'contains-duplicate-ii'), 'Sliding Window - Fixed Size');
 
 const popup = fs.readFileSync('scripts/popup.js', 'utf8');
 const organizer = popup.slice(popup.indexOf('const organizerClassify'), popup.indexOf('const organizerApi'));
@@ -21,3 +22,4 @@ vm.runInContext(`${organizer}\nthis.organizerClassify = organizerClassify;`, con
 assert.equal(context.organizerClassify([{ slug: 'design' }, { slug: 'hash-table' }, { slug: 'linked-list' }], 'design-hashmap'), 'Hash Tables');
 assert.equal(context.organizerClassify([{ slug: 'string' }, { slug: 'queue' }, { slug: 'hash-table' }], 'first-unique-character-in-a-string'), 'Hash Tables');
 assert.equal(context.organizerClassify([{ slug: 'array' }, { slug: 'hash-table' }, { slug: 'math' }], 'number-of-good-pairs'), 'Hash Tables');
+assert.equal(context.organizerClassify([{ slug: 'array' }, { slug: 'hash-table' }, { slug: 'sliding-window' }], 'contains-duplicate-ii'), 'Sliding Window - Fixed Size');
