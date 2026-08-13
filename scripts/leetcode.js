@@ -1432,6 +1432,8 @@
     if (title === "design-hashmap") return "Hash Tables";
     // #535's short-to-long URL lookup is a hash table implementation.
     if (title === "encode-and-decode-tinyurl") return "Hash Tables";
+    // #767's Reorganize String is a hash table implementation.
+    if (title === "reorganize-string") return "Hash Tables";
     // #387 is also tagged queue, but its standard solution counts characters.
     if (title === "first-unique-character-in-a-string") return "Hash Tables";
     // #219 maintains a set for exactly k prior indices.

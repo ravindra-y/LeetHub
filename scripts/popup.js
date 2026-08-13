@@ -354,6 +354,7 @@ const organizerClassify = (topicTags, titleSlug) => {
   if (title === 'longest-consecutive-sequence') return 'Hash Tables';
   if (title === 'design-hashmap') return 'Hash Tables';
   if (title === 'encode-and-decode-tinyurl') return 'Hash Tables';
+  if (title === 'reorganize-string') return 'Hash Tables';
   if (title === 'first-unique-character-in-a-string') return 'Hash Tables';
   if (title === 'contains-duplicate-ii') return 'Sliding Window - Fixed Size';
   if (title === 'best-time-to-buy-and-sell-stock') return 'Greedy';
