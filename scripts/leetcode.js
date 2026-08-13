@@ -1430,6 +1430,8 @@
     if (title === "longest-consecutive-sequence") return "Hash Tables";
     // #706 is also tagged linked-list because chaining is an implementation detail.
     if (title === "design-hashmap") return "Hash Tables";
+    // #535's short-to-long URL lookup is a hash table implementation.
+    if (title === "encode-and-decode-tinyurl") return "Hash Tables";
     // #387 is also tagged queue, but its standard solution counts characters.
     if (title === "first-unique-character-in-a-string") return "Hash Tables";
     // #219 maintains a set for exactly k prior indices.
