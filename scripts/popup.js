@@ -343,158 +343,96 @@ api.storage.local.get('leethub_token', data => {
 // The Git data API lets a group of folder moves become one atomic commit. This
 // avoids the partial moves produced by the Contents API's one-file-at-a-time
 // updates and gives the user a preview before any write happens.
-let organizerScan;
+//
+// The scan itself (classification + one LeetCode/GitHub round trip per
+// folder) now runs in background.js instead of here: this popup's script
+// context is torn down by Chrome the moment it loses focus, which used to
+// silently kill a scan the instant the user clicked away, with no progress
+// shown and no way to resume. Progress is persisted to storage so this popup
+// (whenever it happens to be open) can just render whatever state it finds.
+const organizerEscape = value => $('<div>').text(value).html();
 
-const organizerFolderName = pattern => pattern.replace(/\s*\/\s*/g, ' - ').replace(/[\\?%*:|"<>]/g, '-').trim();
-const organizerClassify = (topicTags, titleSlug) => {
-  const tags = new Set((topicTags || []).map(tag => tag.slug).filter(Boolean));
-  const has = (...names) => names.some(name => tags.has(name));
-  const title = (titleSlug || '').toLowerCase();
-  const titleHas = (...names) => names.some(name => title.includes(name));
-  if (title === 'longest-consecutive-sequence') return 'Hash Tables';
-  if (title === 'design-hashmap') return 'Hash Tables';
-  if (title === 'encode-and-decode-tinyurl') return 'Hash Tables';
-  if (title === 'reorganize-string') return 'Hash Tables';
-  if (title === 'first-unique-character-in-a-string') return 'Hash Tables';
-  if (title === 'contains-duplicate-ii') return 'Sliding Window - Fixed Size';
-  if (title === 'best-time-to-buy-and-sell-stock') return 'Greedy';
-  if (has('binary-search-tree')) return 'BST / Ordered Set';
-  if (has('trie')) return 'Tries';
-  if (has('linked-list')) return titleHas('reverse') ? 'LinkedList In-place Reversal' : has('two-pointers') ? 'Fast and Slow Pointers' : 'Linked List';
-  if (has('dynamic-programming')) {
-    if (has('bitmask')) return 'Bitmask DP';
-    if (titleHas('digit')) return 'Digit DP';
-    if (has('matrix')) return '2D Grid DP';
-    if (has('string', 'string-matching')) return 'String DP';
-    if (has('tree', 'binary-tree', 'graph')) return 'Tree / Graph DP';
-    if (titleHas('stock') || has('game-theory')) return 'State Machine DP';
-    return '1-D DP';
+function renderOrganizerPreview(moves) {
+  $('#organizer_preview').html(
+    moves
+      .map(
+        (move, index) =>
+          `<label style="display:block; margin:4px 0;"><input type="checkbox" class="organizer_move" data-index="${index}" checked> ${organizerEscape(move.problem)}: ${organizerEscape(move.category)} → <strong>${organizerEscape(move.targetCategory)}</strong><br><span style="margin-left:20px; opacity:.7;">${organizerEscape(move.reason)}</span></label>`
+      )
+      .join('')
+  );
+}
+
+function renderOrganizerProgress(progress) {
+  if (!progress || !progress.status) return;
+
+  const running = progress.status === 'running';
+  $('#scan_repository').prop('hidden', running);
+  $('#stop_scan').prop('hidden', !running);
+  $('#scan_progress_bar').prop('hidden', !running);
+
+  if (running) {
+    const percent = progress.total ? Math.round((progress.checked / progress.total) * 100) : 0;
+    $('#scan_progress_fill').css('width', `${percent}%`);
+    $('#organizer_status').text(progress.message || 'Scanning…');
+    $('#apply_organization').prop('hidden', true);
+    return;
   }
-  if (has('sliding-window')) return titleHas('fixed', 'size-k', 'k-length') ? 'Sliding Window - Fixed Size' : 'Sliding Window - Dynamic Size';
-  if (has('two-pointers')) return 'Two Pointers';
-  if (has('prefix-sum')) return 'Prefix Sum';
-  if (has('monotonic-stack')) return 'Monotonic Stack';
-  if (has('monotonic-queue')) return 'Monotonic Queue';
-  if (has('stack')) return 'Stacks';
-  if (has('queue')) return 'Queues';
-  if (has('hash-table')) return 'Hash Tables';
-  if (has('heap-priority-queue')) return titleHas('median') ? 'Two Heaps' : titleHas('kth-', 'top-k', 'k-closest', 'k-frequent') ? 'Top K Elements' : 'Heaps';
-  if (has('binary-search')) return 'Binary Search';
-  if (has('backtracking')) return 'Backtracking';
-  if (has('topological-sort')) return 'Topological Sort';
-  if (has('union-find')) return 'Union Find';
-  if (has('minimum-spanning-tree')) return 'Minimum Spanning Tree';
-  if (has('shortest-path')) return 'Shortest Path';
-  if (has('depth-first-search')) return 'Depth First Search (DFS)';
-  if (has('breadth-first-search')) return 'Breadth First Search (BFS)';
-  if (has('graph')) return 'Depth First Search (DFS)';
-  if (has('design')) return 'Data Structure Design';
-  if (has('greedy')) return 'Greedy';
-  if (has('segment-tree', 'binary-indexed-tree')) return 'Binary Indexed Tree / Segment Tree';
-  if (has('string-matching', 'rolling-hash')) return 'String Matching';
-  if (has('bit-manipulation')) return 'Bit Manipulation';
-  if (has('geometry', 'math')) return 'Maths / Geometry';
-  if (has('matrix')) return 'Matrix (2D Array)';
-  if (has('string')) return 'Strings';
-  if (has('array')) return 'Arrays';
-  return null;
-};
 
-const organizerApi = async (token, path, options = {}) => {
+  if (progress.status === 'done') {
+    $('#organizer_status').text(progress.message);
+    if (progress.moves && progress.moves.length) {
+      renderOrganizerPreview(progress.moves);
+      $('#apply_organization').prop('hidden', false);
+    } else {
+      $('#organizer_preview').empty();
+    }
+  } else if (progress.status === 'stopped') {
+    $('#organizer_status').text(progress.message || 'Scan stopped.');
+  } else if (progress.status === 'error') {
+    $('#organizer_status').text(progress.error);
+  }
+}
+
+$('#organize_repository').on('click', () => $('#organizer_panel').toggle());
+
+$('#scan_repository').on('click', () => {
+  $('#organizer_preview').empty();
+  $('#apply_organization').prop('hidden', true);
+  api.runtime.sendMessage({ type: 'ORGANIZER_SCAN_START' });
+});
+
+$('#stop_scan').on('click', () => {
+  api.runtime.sendMessage({ type: 'ORGANIZER_SCAN_STOP' });
+});
+
+// Live progress while background.js runs the scan, and picking up wherever
+// it left off if this popup was closed and reopened mid-scan.
+api.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.organizerProgress) {
+    renderOrganizerProgress(changes.organizerProgress.newValue);
+  }
+});
+api.storage.local.get('organizerProgress', ({ organizerProgress }) => {
+  if (organizerProgress) renderOrganizerProgress(organizerProgress);
+});
+
+/** Thin GitHub API helper for applying the selected moves (kept here — applying is fast and needs the live checkbox selection, so there's no benefit to running it in the background). */
+async function organizerApiRequest(token, path, options = {}) {
   const response = await fetch(`https://api.github.com${path}`, {
     ...options,
     headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', ...(options.headers || {}) },
   });
   if (!response.ok) throw new Error(`GitHub request failed (${response.status}).`);
   return response.json();
-};
-
-const organizerQuestion = async titleSlug => {
-  const response = await fetch('https://leetcode.com/graphql', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: 'query questionData($titleSlug: String!) { question(titleSlug: $titleSlug) { titleSlug topicTags { slug } } }', variables: { titleSlug } }),
-  });
-  if (!response.ok) throw new Error(`LeetCode request failed (${response.status}).`);
-  const body = await response.json();
-  return body.data?.question || null;
-};
-
-/**
- * Identify only high-confidence implementation patterns.  This deliberately
- * returns null for ambiguous code, allowing the official LeetCode tags to be
- * the safe fallback rather than guessing from variable names alone.
- */
-const organizerSolutionPattern = code => {
-  const text = code.toLowerCase();
-  if (/\^=?|(?:[\w.)\]])\s*[&|]=?\s*(?:[\w.(\[]|\d)|(?:[\w.)\]])\s*(?:<<|>>)\s*(?:[\w.(\[]|\d)|~\s*(?:[\w.(\[]|\d)/.test(text)) return { pattern: 'Bit Manipulation', evidence: 'bitwise operation' };
-  if (/\b(parent|rank|size)\b/.test(text) && /\b(find|union)\s*\(/.test(text)) return { pattern: 'Union Find', evidence: 'find/union parent structure' };
-  if (/\b(segmenttree|buildtree|querytree|updatetree)\b/.test(text)) return { pattern: 'Binary Indexed Tree / Segment Tree', evidence: 'segment-tree operations' };
-  if (/\b(deque|arraydeque)\b/.test(text) && /\b(monotonic|pop_front|pop_back)\b/.test(text)) return { pattern: 'Monotonic Queue', evidence: 'monotonic deque' };
-  if (/\b(stack\b|vector<\s*int\s*>)/.test(text) && /\.top\(\)|\.back\(\)/.test(text) && /\bwhile\b/.test(text)) return { pattern: 'Monotonic Stack', evidence: 'stack pop loop' };
-  if (/\b(priority_queue|heapq|priorityqueue)\b/.test(text)) return { pattern: 'Heaps', evidence: 'priority queue / heap' };
-  if (/\b(minprice|min_price|lowestprice|lowest_price|bestbuy|best_buy)\b/.test(text) && /\b(maxprofit|max_profit)\b/.test(text)) return { pattern: 'Greedy', evidence: 'running minimum price and maximum profit' };
-  if (/\b(mid|middle)\b/.test(text) && /\b(left|right|low|high)\b/.test(text) && /\bwhile\b/.test(text)) return { pattern: 'Binary Search', evidence: 'midpoint search bounds' };
-  if (/\b(queue|arraydeque)\b/.test(text) && /\bwhile\b/.test(text) && /\b(pop|poll|dequeue)\b/.test(text)) return { pattern: 'Breadth First Search (BFS)', evidence: 'queue traversal loop' };
-  if (/\bdfs\s*\(/.test(text) && /\bdfs\s*\([^)]*\).*\bdfs\s*\(/s.test(text)) return { pattern: 'Depth First Search (DFS)', evidence: 'recursive DFS' };
-  return null;
-};
-
-const organizerBlobText = async (token, hook, sha) => {
-  const blob = await organizerApi(token, `/repos/${hook}/git/blobs/${sha}`);
-  return decodeURIComponent(escape(atob(blob.content.replace(/\n/g, ''))));
-};
-
-const organizerSetStatus = message => $('#organizer_status').text(message);
-const organizerEscape = value => $('<div>').text(value).html();
-
-$('#organize_repository').on('click', () => $('#organizer_panel').toggle());
-$('#scan_repository').on('click', async () => {
-  $('#apply_organization').prop('hidden', true);
-  $('#organizer_preview').empty();
-  organizerSetStatus('Reading repository structure…');
-  try {
-    const { leethub_token: token, leethub_hook: hook } = await api.storage.local.get(['leethub_token', 'leethub_hook']);
-    if (!token || !hook) throw new Error('Connect a GitHub token and repository before organizing.');
-    const repo = await organizerApi(token, `/repos/${hook}`);
-    const ref = await organizerApi(token, `/repos/${hook}/git/ref/heads/${encodeURIComponent(repo.default_branch)}`);
-    const commit = await organizerApi(token, `/repos/${hook}/git/commits/${ref.object.sha}`);
-    const tree = await organizerApi(token, `/repos/${hook}/git/trees/${commit.tree.sha}?recursive=1`);
-    const folders = new Map();
-    for (const entry of tree.tree.filter(entry => entry.type === 'blob')) {
-      const [category, problem] = entry.path.split('/');
-      if (!category || !problem || !/^\d+-[a-z0-9-]+$/i.test(problem)) continue;
-      const key = `${category}/${problem}`;
-      if (!folders.has(key)) folders.set(key, { category, problem, files: [] });
-      folders.get(key).files.push(entry);
-    }
-    const moves = [];
-    for (const folder of folders.values()) {
-      const slug = folder.problem.replace(/^\d+-/, '');
-      organizerSetStatus(`Checking ${folder.problem}… (${moves.length} correction${moves.length === 1 ? '' : 's'} found)`);
-      const question = await organizerQuestion(slug);
-      if (!question) continue;
-      const codeFile = folder.files.find(file => /\.(c|cc|cpp|cs|go|java|js|kt|php|py|rb|rs|scala|swift|ts)$/i.test(file.path));
-      let implementation;
-      if (codeFile) try { implementation = organizerSolutionPattern(await organizerBlobText(token, hook, codeFile.sha)); }
-      catch (_) { /* A code read failure falls back to the official problem tags. */ }
-      const targetCategory = implementation?.pattern || organizerClassify(question.topicTags, question.titleSlug);
-      if (!targetCategory || organizerFolderName(targetCategory) === folder.category) continue;
-      const target = `${organizerFolderName(targetCategory)}/${folder.problem}`;
-      const conflict = tree.tree.some(entry => entry.path === target || entry.path.startsWith(`${target}/`));
-      if (!conflict) moves.push({ ...folder, targetCategory: organizerFolderName(targetCategory), target, reason: implementation ? `solution pattern: ${implementation.evidence}` : 'LeetCode topic tags' });
-    }
-    organizerScan = { token, hook, branch: repo.default_branch, parentSha: ref.object.sha, baseTreeSha: commit.tree.sha, entries: tree.tree, moves };
-    if (!moves.length) { organizerSetStatus('Everything scanned is already in the expected folder.'); return; }
-    $('#organizer_preview').html(moves.map((move, index) => `<label style="display:block; margin:4px 0;"><input type="checkbox" class="organizer_move" data-index="${index}" checked> ${organizerEscape(move.problem)}: ${organizerEscape(move.category)} → <strong>${organizerEscape(move.targetCategory)}</strong><br><span style="margin-left:20px; opacity:.7;">${organizerEscape(move.reason)}</span></label>`).join(''));
-    $('#apply_organization').prop('hidden', false);
-    organizerSetStatus(`${moves.length} safe move${moves.length === 1 ? '' : 's'} ready. No change has been made yet.`);
-  } catch (error) { organizerSetStatus(error.message); }
-});
+}
 
 $('#apply_organization').on('click', async () => {
+  const { organizerScan } = await api.storage.local.get('organizerScan');
+  if (!organizerScan) { $('#organizer_status').text('Scan again — no scan results were found.'); return; }
   const selected = $('.organizer_move:checked').map((_, element) => organizerScan.moves[Number(element.dataset.index)]).get();
-  if (!selected.length) { organizerSetStatus('Select at least one move.'); return; }
-  organizerSetStatus('Creating one GitHub commit…');
+  if (!selected.length) { $('#organizer_status').text('Select at least one move.'); return; }
+  $('#organizer_status').text('Creating one GitHub commit…');
   $('#apply_organization').prop('disabled', true);
   try {
     const changes = selected.flatMap(move => move.files.flatMap(file => {
@@ -505,7 +443,7 @@ $('#apply_organization').on('click', async () => {
     // Without this, a later submission of the same problem could be treated as new.
     const statsEntry = organizerScan.entries.find(entry => entry.path === 'stats.json' && entry.type === 'blob');
     if (statsEntry) {
-      const blob = await organizerApi(organizerScan.token, `/repos/${organizerScan.hook}/git/blobs/${statsEntry.sha}`);
+      const blob = await organizerApiRequest(organizerScan.token, `/repos/${organizerScan.hook}/git/blobs/${statsEntry.sha}`);
       const statsFile = JSON.parse(decodeURIComponent(escape(atob(blob.content.replace(/\n/g, '')))));
       const shas = statsFile?.leetcode?.shas;
       let changedStats = false;
@@ -519,13 +457,13 @@ $('#apply_organization').on('click', async () => {
         }
       }
       if (changedStats) {
-        const statsBlob = await organizerApi(organizerScan.token, `/repos/${organizerScan.hook}/git/blobs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: btoa(unescape(encodeURIComponent(JSON.stringify(statsFile)))), encoding: 'base64' }) });
+        const statsBlob = await organizerApiRequest(organizerScan.token, `/repos/${organizerScan.hook}/git/blobs`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: btoa(unescape(encodeURIComponent(JSON.stringify(statsFile)))), encoding: 'base64' }) });
         changes.push({ path: 'stats.json', mode: statsEntry.mode, type: 'blob', sha: statsBlob.sha });
       }
     }
-    const newTree = await organizerApi(organizerScan.token, `/repos/${organizerScan.hook}/git/trees`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base_tree: organizerScan.baseTreeSha, tree: changes }) });
-    const newCommit = await organizerApi(organizerScan.token, `/repos/${organizerScan.hook}/git/commits`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Organize ${selected.length} LeetCode solution${selected.length === 1 ? '' : 's'}`, tree: newTree.sha, parents: [organizerScan.parentSha] }) });
-    await organizerApi(organizerScan.token, `/repos/${organizerScan.hook}/git/refs/heads/${encodeURIComponent(organizerScan.branch)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha: newCommit.sha, force: false }) });
+    const newTree = await organizerApiRequest(organizerScan.token, `/repos/${organizerScan.hook}/git/trees`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ base_tree: organizerScan.baseTreeSha, tree: changes }) });
+    const newCommit = await organizerApiRequest(organizerScan.token, `/repos/${organizerScan.hook}/git/commits`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Organize ${selected.length} LeetCode solution${selected.length === 1 ? '' : 's'}`, tree: newTree.sha, parents: [organizerScan.parentSha] }) });
+    await organizerApiRequest(organizerScan.token, `/repos/${organizerScan.hook}/git/refs/heads/${encodeURIComponent(organizerScan.branch)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha: newCommit.sha, force: false }) });
     const { stats } = await api.storage.local.get('stats');
     if (stats?.shas) {
       for (const move of selected) {
@@ -537,9 +475,9 @@ $('#apply_organization').on('click', async () => {
       }
       await api.storage.local.set({ stats });
     }
-    organizerSetStatus(`Done — moved ${selected.length} solution${selected.length === 1 ? '' : 's'} in commit ${newCommit.sha.slice(0, 7)}.`);
+    $('#organizer_status').text(`Done — moved ${selected.length} solution${selected.length === 1 ? '' : 's'} in commit ${newCommit.sha.slice(0, 7)}.`);
     $('#apply_organization').prop('hidden', true);
-  } catch (error) { organizerSetStatus(`${error.message} Scan again before retrying if the repository changed.`); }
+  } catch (error) { $('#organizer_status').text(`${error.message} Scan again before retrying if the repository changed.`); }
   finally { $('#apply_organization').prop('disabled', false); }
 });
 

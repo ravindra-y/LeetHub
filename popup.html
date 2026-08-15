@@ -88,6 +88,14 @@
               Scan your LeetCode folders, preview category corrections, then apply them in one GitHub commit.
             </p>
             <button id="scan_repository" type="button" class="ui button">Scan for misplaced solutions</button>
+            <button id="stop_scan" type="button" class="ui red button" hidden>Stop scan</button>
+            <div
+              id="scan_progress_bar"
+              hidden
+              style="background: #eee; border-radius: 4px; height: 6px; margin-top: 8px; overflow: hidden;"
+            >
+              <div id="scan_progress_fill" style="background: #21ba45; height: 100%; width: 0%; transition: width 0.2s;"></div>
+            </div>
             <div id="organizer_status" role="status" style="font-size: 0.8em; margin-top: 8px;"></div>
             <div id="organizer_preview" style="font-size: 0.8em; margin-top: 8px;"></div>
             <button id="apply_organization" type="button" class="ui positive button" hidden>

@@ -213,7 +213,9 @@
     ) {
 
       const submitBtn = document.evaluate(".//button[text()='Submit']", document.body, null, XPathResult.ANY_TYPE, null).iterateNext();
-      if (!submitBtn) return;
+
+      if (!submitBtn || submitBtn.dataset.leethubBound) return;
+      submitBtn.dataset.leethubBound = 'true';
 
       submitBtn.addEventListener('click', function () {
         START_MONITOR = true;
@@ -230,11 +232,16 @@
             clearInterval(gfgLoader);
             clearInterval(submission);
             // get data
-            title = findTitle().trim();
-            difficulty = findDifficulty();
-            problemStatement = getProblemStatement();
-            code = getCode();
-            language = findGfgLanguage();
+            try {
+              title = findTitle().trim();
+              difficulty = findDifficulty();
+              problemStatement = getProblemStatement();
+              code = getCode();
+              language = findGfgLanguage();
+            } catch (err) {
+              console.warn('LeetHub: failed to read solved GFG problem from the page', err);
+              return;
+            }
 
             // format data
             const probName = `${title} - GFG`;
@@ -256,6 +263,8 @@
                   );
                 }, 1000);
               }
+            } else {
+              console.warn('LeetHub: could not detect the GFG submission language, skipping upload for', title);
             }
           } else if (output && output.includes('Compilation Error')) {
             // clear timeout and do nothing
