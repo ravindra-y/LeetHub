@@ -377,6 +377,7 @@ const organizerClassify = (topicTags, titleSlug) => {
   if (has('monotonic-queue')) return 'Monotonic Queue';
   if (has('stack')) return 'Stacks';
   if (has('queue')) return 'Queues';
+  if (has('hash-table')) return 'Hash Tables';
   if (has('heap-priority-queue')) return titleHas('median') ? 'Two Heaps' : titleHas('kth-', 'top-k', 'k-closest', 'k-frequent') ? 'Top K Elements' : 'Heaps';
   if (has('binary-search')) return 'Binary Search';
   if (has('backtracking')) return 'Backtracking';
@@ -392,7 +393,6 @@ const organizerClassify = (topicTags, titleSlug) => {
   if (has('segment-tree', 'binary-indexed-tree')) return 'Binary Indexed Tree / Segment Tree';
   if (has('string-matching', 'rolling-hash')) return 'String Matching';
   if (has('bit-manipulation')) return 'Bit Manipulation';
-  if (has('hash-table')) return 'Hash Tables';
   if (has('geometry', 'math')) return 'Maths / Geometry';
   if (has('matrix')) return 'Matrix (2D Array)';
   if (has('string')) return 'Strings';
