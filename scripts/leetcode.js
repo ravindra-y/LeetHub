@@ -1501,6 +1501,7 @@
       if (titleHas("knapsack", "partition-equal-subset", "target-sum"))
         return "0/1 Knapsack";
       if (has("matrix")) return "2D Grid DP";
+      if (title === "number-of-good-ways-to-split-a-string") return "Hash Tables";
       if (has("string", "string-matching")) return "String DP";
       if (has("tree", "binary-tree", "graph")) return "Tree / Graph DP";
       if (titleHas("stock") || has("game-theory")) return "State Machine DP";

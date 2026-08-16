@@ -102,6 +102,7 @@ function organizerClassify(topicTags, titleSlug) {
     if (has("bitmask")) return "Bitmask DP";
     if (titleHas("digit")) return "Digit DP";
     if (has("matrix")) return "2D Grid DP";
+    if (title === "number-of-good-ways-to-split-a-string") return "Hash Tables";
     if (has("string", "string-matching")) return "String DP";
     if (has("tree", "binary-tree", "graph")) return "Tree / Graph DP";
     if (titleHas("stock") || has("game-theory")) return "State Machine DP";
