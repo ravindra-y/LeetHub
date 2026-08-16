@@ -830,7 +830,7 @@
     toolTip.textContent =
       "Manually upload this submission to GitHub (beta).\nThis will OVERWRITE your current submission.\nPlease be mindful of your GitHub rate-limits.";
     toolTip.className =
-      "leethub-sync-tooltip bg-sd-popover text-sd-popover-foreground rounded-sd-md z-modal text-xs text-left font-normal whitespace-pre-line shadow p-3 border-sd-border border cursor-default";
+      "leethub-sync-tooltip bg-sd-popover text-sd-popover-foreground rounded-sd-md z-modal text-xs text-left font-normal leading-snug whitespace-pre-line shadow p-2 border-sd-border border cursor-default";
     return toolTip;
   };
 
@@ -878,7 +878,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: max-content;
-      max-width: 260px;
+      max-width: 190px;
       pointer-events: none;
       opacity: 0;
       transition: opacity .2s ease;
