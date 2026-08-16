@@ -830,7 +830,7 @@
     toolTip.textContent =
       "Manually upload this submission to GitHub (beta).\nThis will OVERWRITE your current submission.\nPlease be mindful of your GitHub rate-limits.";
     toolTip.className =
-      "fixed bg-sd-popover text-sd-popover-foreground rounded-sd-md z-modal text-xs text-left font-normal whitespace-pre-line shadow p-3 border-sd-border border cursor-default translate-y-20 transition-opacity opacity-0 transition-delay-1000 duration-300 group-hover:opacity-100";
+      "leethub-sync-tooltip bg-sd-popover text-sd-popover-foreground rounded-sd-md z-modal text-xs text-left font-normal whitespace-pre-line shadow p-3 border-sd-border border cursor-default";
     return toolTip;
   };
 
@@ -869,6 +869,24 @@
     const style = document.createElement("style");
     style.textContent = `
     .leethub-sync-wrap { position: relative; display: inline-flex; vertical-align: middle; }
+    /* Tooltip lives on the wrap, not the button, and is ALWAYS pointer-events:none
+       so it can never receive hover/click events of its own — it can only ever
+       become visible or clicked *through* genuinely hovering/clicking the button. */
+    .leethub-sync-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: 260px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .leethub-sync-wrap:hover .leethub-sync-tooltip {
+      opacity: 1;
+      transition-delay: .5s;
+    }
     .leethub-sync-btn {
       position: relative;
       overflow: hidden;
@@ -1031,8 +1049,6 @@
       label.textContent = "Sync w/ LeetHub";
       btn.appendChild(label);
 
-      btn.appendChild(createToolTip());
-
       btn.addEventListener("click", (e) => {
         if (wrap.classList.contains("loading")) return;
         wrap.classList.remove("success", "fail", "reset");
@@ -1045,6 +1061,10 @@
       wrap.appendChild(btn);
       wrap.appendChild(createSyncLoader());
       wrap.appendChild(createSyncStatusIcon());
+      // Appended to wrap (not btn) so overflow:hidden on the button never
+      // clips it, and so it can only ever be triggered by hovering the
+      // actual button/wrap area — never by an invisible click-catcher.
+      wrap.appendChild(createToolTip());
 
       btns.appendChild(wrap);
     }
