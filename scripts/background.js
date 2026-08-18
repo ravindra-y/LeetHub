@@ -93,6 +93,7 @@ function organizerClassify(topicTags, titleSlug) {
   if (title === "encode-and-decode-tinyurl") return "Hash Tables";
   if (title === "reorganize-string") return "Hash Tables";
   if (title === "first-unique-character-in-a-string") return "Hash Tables";
+  if (title === "minimum-deletions-to-make-character-frequencies-unique") return "Hash Tables";
   if (title === "contains-duplicate-ii") return "Sliding Window - Fixed Size";
   if (title === "best-time-to-buy-and-sell-stock") return "Greedy";
   if (has("binary-search-tree")) return "BST / Ordered Set";

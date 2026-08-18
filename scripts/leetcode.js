@@ -1456,6 +1456,10 @@
     if (title === "reorganize-string") return "Hash Tables";
     // #387 is also tagged queue, but its standard solution counts characters.
     if (title === "first-unique-character-in-a-string") return "Hash Tables";
+    // 1647 is also tagged string, but its canonical solution counts characters.
+    if (title === "number-of-good-ways-to-split-a-string") return "Hash Tables";
+    // #1647 uses a frequency hash table/set to ensure character frequencies are unique.
+    if (title === "minimum-deletions-to-make-character-frequencies-unique") return "Hash Tables";
     // #219 maintains a set for exactly k prior indices.
     if (title === "contains-duplicate-ii") return "Sliding Window - Fixed Size";
 
@@ -1501,7 +1505,8 @@
       if (titleHas("knapsack", "partition-equal-subset", "target-sum"))
         return "0/1 Knapsack";
       if (has("matrix")) return "2D Grid DP";
-      if (title === "number-of-good-ways-to-split-a-string") return "Hash Tables";
+      if (title === "number-of-good-ways-to-split-a-string")
+        return "Hash Tables";
       if (has("string", "string-matching")) return "String DP";
       if (has("tree", "binary-tree", "graph")) return "Tree / Graph DP";
       if (titleHas("stock") || has("game-theory")) return "State Machine DP";
