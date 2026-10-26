@@ -1833,7 +1833,25 @@ This repository contains my personal C++ solutions to various Data Structures an
 
   const WAIT_FOR_GITHUB_API_TO_NOT_THROW_409_MS = 500;
 
-  const leetcode_api = getBrowser();
+  /**
+   * Returns the browser API, re-acquired on every call so a content script
+   * that outlives a background service-worker restart never holds a stale
+   * (invalidated) extension context reference.
+   * @returns {typeof chrome | typeof browser}
+   */
+  function getLeetcodeApi() {
+    return getBrowser();
+  }
+
+  // Legacy alias kept for the module-scope call sites that still use it as a
+  // plain object.  All async paths should prefer getLeetcodeApi() directly.
+  const leetcode_api = { storage: { local: {}, sync: {} } };
+  ['get', 'set', 'remove'].forEach((method) => {
+    leetcode_api.storage.local[method] = (...args) =>
+      getLeetcodeApi().storage.local[method](...args);
+    leetcode_api.storage.sync[method] = (...args) =>
+      getLeetcodeApi().storage.sync[method](...args);
+  });
 
   /**
    * Constructs a file path by appending the given filename to the problem directory.
@@ -2587,6 +2605,14 @@ This repository contains my personal C++ solutions to various Data Structures an
   submitBtn(
     debounce(
       () => {
+        // Guard: if the background service worker was killed and reloaded,
+        // the extension context will be invalidated. Bail out instead of
+        // crashing so the user gets a clean fail rather than an unhandled error.
+        if (!getLiveRuntime()) {
+          console.warn('LeetHub: extension context invalidated; please reload the page to re-enable auto-sync.');
+          return;
+        }
+
         const leetCode = new LeetCodeV2();
         // Manual submission event can only fire when we have submissionId. Simply retrieve it.
         const submissionMatch = window.location.href.match(
