@@ -3,8 +3,10 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const source = fs.readFileSync('scripts/leetcode.js', 'utf8');
-const start = source.indexOf("const leetCodeUsername = 'ravindra-y';");
-const end = source.indexOf("const readmeFilename = 'README.md';");
+const startMatch = source.match(/const\s+leetCodeUsername\s*=/);
+const endMatch = source.match(/const\s+readmeFilename\s*=/);
+const start = startMatch ? startMatch.index : -1;
+const end = endMatch ? endMatch.index : -1;
 const context = {};
 vm.createContext(context);
 vm.runInContext(`${source.slice(start, end)}\nthis.buildRepoReadme = buildRepoReadme;`, context);
@@ -12,3 +14,4 @@ vm.runInContext(`${source.slice(start, end)}\nthis.buildRepoReadme = buildRepoRe
 const readme = context.buildRepoReadme({ solved: 1, acceptanceRate: 50, currentStreak: 1, maxStreak: 1 }, 'ravindra-y');
 assert.match(readme, /badge\/LeetCode-ravindra--y-FFA116/);
 assert.match(readme, /badge\/GitHub-ravindra--y-181717/);
+console.log('readme-badges test passed!');

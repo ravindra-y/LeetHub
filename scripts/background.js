@@ -99,6 +99,7 @@ function organizerClassify(topicTags, titleSlug) {
   if (has("binary-search-tree")) return "BST / Ordered Set";
   if (has("trie")) return "Tries";
   if (has("linked-list")) return titleHas("reverse") ? "LinkedList In-place Reversal" : has("two-pointers") ? "Fast and Slow Pointers" : "Linked List";
+  if (titleHas("maximum-subarray", "maximum-sum-circular-subarray")) return "Kadane's Algorithm";
   if (has("dynamic-programming")) {
     if (has("bitmask")) return "Bitmask DP";
     if (titleHas("digit")) return "Digit DP";

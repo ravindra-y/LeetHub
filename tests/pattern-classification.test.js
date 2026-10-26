@@ -108,10 +108,10 @@ assert.equal(
   "Kadane's Algorithm",
 );
 
-const popup = fs.readFileSync("scripts/popup.js", "utf8");
-const organizer = popup.slice(
-  popup.indexOf("const organizerClassify"),
-  popup.indexOf("const organizerApi"),
+const bg = fs.readFileSync("scripts/background.js", "utf8");
+const organizer = bg.slice(
+  bg.indexOf("function organizerClassify"),
+  bg.indexOf("function organizerSolutionPattern"),
 );
 vm.runInContext(
   `${organizer}\nthis.organizerClassify = organizerClassify;`,
@@ -165,4 +165,16 @@ assert.equal(
     "reorganize-string",
   ),
   "Hash Tables",
+);
+
+assert.equal(
+  context.organizerClassify(
+    [
+      { slug: "array" },
+      { slug: "divide-and-conquer" },
+      { slug: "dynamic-programming" },
+    ],
+    "maximum-subarray",
+  ),
+  "Kadane's Algorithm",
 );

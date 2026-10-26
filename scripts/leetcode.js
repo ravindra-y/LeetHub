@@ -1050,6 +1050,10 @@
       btn.appendChild(label);
 
       btn.addEventListener("click", (e) => {
+        if (!getLiveRuntime()) {
+          alert("LeetHub extension has been reloaded or updated.\n\nPlease refresh this LeetCode page (press F5 or Ctrl+R) to reconnect the extension, then click 'Sync w/ LeetHub' again.");
+          return;
+        }
         if (wrap.classList.contains("loading")) return;
         wrap.classList.remove("success", "fail", "reset");
         btn.style.setProperty("--leethub-btn-w", btn.offsetWidth + "px");
@@ -2348,6 +2352,11 @@ This repository contains my personal C++ solutions to various Data Structures an
 
   /** @param {LeetCodeV1 | LeetCodeV2} leetCode */
   function loader(leetCode) {
+    if (!getLiveRuntime()) {
+      setLeethubSyncButtonState("fail");
+      alert("LeetHub extension has been reloaded or updated.\n\nPlease refresh this LeetCode page (press F5 or Ctrl+R) to reconnect the extension.");
+      return;
+    }
     let iterations = 0;
     const intervalId = setInterval(async () => {
       try {
@@ -2464,6 +2473,11 @@ This repository contains my personal C++ solutions to various Data Structures an
       } catch (err) {
         leetCode.markUploadFailed();
         clearInterval(intervalId);
+
+        if (/Extension context invalidated/i.test(err?.message || "")) {
+          alert("LeetHub extension has been reloaded or updated.\n\nPlease refresh this LeetCode page (press F5 or Ctrl+R) to reconnect the extension.");
+          return;
+        }
 
         if (!(err instanceof util_LeetHubError)) {
           console.error(err);
@@ -2609,7 +2623,8 @@ This repository contains my personal C++ solutions to various Data Structures an
         // the extension context will be invalidated. Bail out instead of
         // crashing so the user gets a clean fail rather than an unhandled error.
         if (!getLiveRuntime()) {
-          console.warn('LeetHub: extension context invalidated; please reload the page to re-enable auto-sync.');
+          setLeethubSyncButtonState("fail");
+          alert("LeetHub extension has been reloaded or updated.\n\nPlease refresh this LeetCode page (press F5 or Ctrl+R) to reconnect the extension, then click 'Sync w/ LeetHub' again.");
           return;
         }
 
@@ -2619,6 +2634,7 @@ This repository contains my personal C++ solutions to various Data Structures an
           /leetcode\.com\/.*\/submissions\/(\d+)/,
         );
         if (!submissionMatch) {
+          setLeethubSyncButtonState("fail");
           return;
         }
 
