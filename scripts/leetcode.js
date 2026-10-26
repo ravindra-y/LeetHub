@@ -1495,6 +1495,11 @@
       // tracks the lowest price seen so far and is a greedy pattern.  Keep it
       // with the other greedy problems instead of the multi-state stock DP set.
       if (title === "best-time-to-buy-and-sell-stock") return "Greedy";
+      // #53 / #918 are the canonical Kadane's Algorithm problems - even though
+      // LeetCode tags them with "dynamic-programming", their textbook solution
+      // is Kadane's, so they belong in that folder, not "1-D DP".
+      if (titleHas("maximum-subarray", "maximum-sum-circular-subarray"))
+        return "Kadane's Algorithm";
       if (has("bitmask")) return "Bitmask DP";
       if (titleHas("digit")) return "Digit DP";
       if (has("probability-and-statistics")) return "Probability DP";

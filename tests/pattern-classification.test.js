@@ -81,6 +81,32 @@ assert.equal(
   ),
   "Hash Tables",
 );
+// #53 Maximum Subarray → Kadane's Algorithm (must NOT fall into 1-D DP)
+assert.equal(
+  context.getPatternFolder(
+    [
+      { slug: "array" },
+      { slug: "divide-and-conquer" },
+      { slug: "dynamic-programming" },
+    ],
+    "maximum-subarray",
+  ),
+  "Kadane's Algorithm",
+);
+// #918 Maximum Sum Circular Subarray → Kadane's Algorithm
+assert.equal(
+  context.getPatternFolder(
+    [
+      { slug: "array" },
+      { slug: "divide-and-conquer" },
+      { slug: "dynamic-programming" },
+      { slug: "queue" },
+      { slug: "monotonic-queue" },
+    ],
+    "maximum-sum-circular-subarray",
+  ),
+  "Kadane's Algorithm",
+);
 
 const popup = fs.readFileSync("scripts/popup.js", "utf8");
 const organizer = popup.slice(
